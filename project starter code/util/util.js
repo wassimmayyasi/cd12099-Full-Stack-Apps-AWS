@@ -1,3 +1,4 @@
+import axios from "axios";
 import fs from "fs";
 import Jimp from "jimp";
 
@@ -12,7 +13,10 @@ import Jimp from "jimp";
  export async function filterImageFromURL(inputURL) {
   return new Promise(async (resolve, reject) => {
     try {
-      const photo = await Jimp.read(inputURL);
+      const photoBuffer = await axios.get(inputURL, {
+        responseType: "arraybuffer",
+      });
+      const photo = await Jimp.read(Buffer.from(photoBuffer?.data, "binary"));
       const outpath =
         "/tmp/filtered." + Math.floor(Math.random() * 2000) + ".jpg";
       await photo
@@ -36,5 +40,15 @@ import Jimp from "jimp";
  export async function deleteLocalFiles(files) {
   for (let file of files) {
     fs.unlinkSync(file);
+  }
+}
+
+
+export async function validateURL(image_input) {
+  try {
+    new URL(image_input);
+    return true;
+  } catch(error) {
+    return false;
   }
 }
